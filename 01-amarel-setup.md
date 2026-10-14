@@ -27,6 +27,28 @@ Amarel follows a tentative maintenance schedule with maintenance outages spannin
 * **Account Request**: [https://it.rutgers.edu/research-computing/amarel-cluster-access-request/](https://it.rutgers.edu/research-computing/amarel-cluster-access-request/)
 * **System Status**: [https://it.rutgers.edu/research-computing/amarel-system-status/](https://it.rutgers.edu/research-computing/amarel-system-status/)
 
+## Cluster Basics
+
+Before proceeding, it is helpful to review basic cluster computing terms and concepts. A computing cluster is a collection of interconnected computers, called *nodes*, that work together to provide computational resources. Clusters allow users to run workloads that require more processing power, memory, or storage than is available on a typical personal computer.
+
+### Login Nodes vs. Compute Nodes
+
+**Login nodes** are used to access the cluster, manage files, install software, and submit computational jobs. They are not intended for computationally intensive tasks.
+
+**Compute nodes** are dedicated to executing computational jobs. Users typically access these resources through a job scheduler rather than connecting to them directly.
+
+### Shared Resource Management
+
+Computing clusters are shared by many users, who must share limited computational resources. A **job scheduler**, such as Slurm (the scheduler used by Amarel), manages these resources by allocating compute nodes, CPU cores, memory, and GPUs to submitted jobs. Jobs may be placed in a queue until the requested resources become available. (Yes this means you might need to go grab a coffee while you wait for your job to start!)
+
+### Partitions
+
+A **partition** is a logical grouping of compute nodes with particular hardware configurations or scheduling policies. For example, Amarel provides a `main` partition for general computing and a `gpu` partition for GPU-accelerated workloads. Users select an appropriate partition when submitting jobs, depending on their computational requirements.
+
+### Cores and Hyperthreads
+
+A **CPU core** is a physical processing unit inside a CPU that independently executes program instructions. Modern CPUs contain multiple cores, allowing multiple tasks to execute in parallel. **Hyper-threading** is an Intel technology that allows a single physical CPU core to execute two hardware threads, appearing to the operating system as two *logical CPUs*. AMD provides similar functionality through *simultaneous multithreading* (SMT). Logical CPUs share the resources of their underlying physical core, so two hyperthreads do not generally provide twice the performance of a single physical core.
+
 ## Setup
 
 These steps need to be performed before accessing Amarel for the first time.
@@ -112,7 +134,9 @@ Successful login will either show a welcome message or simply land you on the lo
 
 **NOTE: the login server is NOT where you do work. The login server that you land on when you first login to Amarel is NOT the place where you should be running programs or attempting to perform larger computing jobs.**
 
-The login server is a shared computing node that is less powerful than the machines that actually perform heavy computing jobs on Amarel. Many other people are likely on the server at the same time as you are. If you attempt to perform intensive work from this server (e.g., training a large model).
+The login server is a shared computing node that is less powerful than the machines that actually perform heavy computing jobs on Amarel. Many other people are likely on the server at the same time as you are. If you attempt to perform intensive work from this server (e.g., training a large model). As we will see next, we will use the tools on Amarel to request a partition of the GPU servers available and use these servers to do our work.
+
+On successful login, you should see a message like the following.
 
 ```
 Last login: Wed Jul  8 11:11:14 2026 from 10.75.233.8
@@ -137,67 +161,58 @@ login nodes (amarel1, amarel2, etc.). That's what compute nodes are for.
 [saul@amarel2 ~]$
 ```
 
-## Confirm You are Logged in Correctly
+### Confirm You are Logged in Correctly
 
-Explore with
+Once you see the message above, you can explore the login node (again, not this is NOT where you do work) to confirm everything is working as expected.
 
+Start by printing the hostname.
+
+```bash
 hostname
+```
+
+The hostname should show you are on one of the Amarel login nodes. You should see something like the following.
+
+```text
+amarel3.amarel.rutgers.edu
+```
+
+This should not be the name of your local machine or any other machine. Later, we will request an interactive GPU session and use `hostname` to confirm that we are not on the login node anymore so we can be sure we are ready to do work without disturbing other users.
+
+Confirm your user name and check where you are.
+
+```bash
 whoami
 pwd
+```
+
+You should be logged in as your Amarel account name and `pwd` should show you are in your home directory on the login node.
+
+See the files in your home directory.
+
+```bash
 ls -al
+```
 
-hostname should show you are on a login node, e.g.,
+These login nodes are shared by many users and are intended for light administrative work. You can use them for configuring and managing the software packages you need to work but must submit all resource intensive jobs through the scheduler that we will review below.
 
-amarel3.amarel.rutgers.edu
+### Understand Your Shell Environment
 
-Note this will change later when you request GPUs through the scheduler.
+If you need a review of how the shell environment works reference prior course materials along with the tutorial in the Amarel user guide [here](https://user-guide-f4258a.gitlab.io/environment/shell_startup/).
 
-These are shared by many users and are intended for light administrative work. Rutgers explicitly instructs users to run computational work through the scheduler.
+### (Optional) View and Load Modules with Lmod
 
+Users are free to install their own software on Amarel (see directions in the following sections) however Amarel also provides Lmod for automated package management and development environment configuration.
 
+You can read about Lmod in the [official documentation](https://lmod.readthedocs.io/en/latest/index.html) and [official user guide](https://lmod.readthedocs.io/en/latest/010_user.html). The Amarel user guide provides a [tutorial](https://user-guide-f4258a.gitlab.io/environment/lmod/) on using Lmod.
 
-## Understand Your Shell Environment
+You are welcome to use Lmod where it makes sense for your projects. In this tutorial we will review standing up a custom Python development environment similar to the environment we have already been using in class.
 
-Read tutorial here
-https://user-guide-f4258a.gitlab.io/environment/shell_startup/
-
-## Learn How to View and Load Modules
-
-https://user-guide-f4258a.gitlab.io/environment/lmod/
-
-lmod
-
-Documentation: https://lmod.readthedocs.io/en/latest/index.html
-User Guide: https://lmod.readthedocs.io/en/latest/010_user.html
-
-module
-
-
-ml avail
-ml spider
-
-ml cuda
-ml gcc
-
-## Cluster Basics
-
-### Login Nodes vs. Compute Nodes
-
-### Shared Resource Management
-
-### Partitions
-
-### Cores and Hyperthreads
-
-A CPU core is a physical processing unit inside a computer's central processing unit (CPU) that independently reads and executes program instructions.
-
-Hyper-threading (officially called Hyper-Threading Technology or HTT) is an Intel technology that allows a single physical CPU core to act like two logical (virtual) cores by processing two instruction streams, or threads, at the same time.
+You can use `ml avail` to list available Lmod packages. You can activate and Lmod environment with `ml <name>`, i.e., `ml cuda` or `ml gcc`.
 
 ## Slurm and Job Scheduling Basics
 
-https://user-guide-f4258a.gitlab.io/jobs/
-
-Amarel uses Slurm for cluster/resource management and job scheduling. Slurm is responsible for allocating resources to users, providing a framework for starting, executing and monitoring work on allocated resources and scheduling work for future execution.
+Amarel uses Slurm for cluster/resource management and job scheduling. Slurm is responsible for allocating resources to users, providing a framework for starting, executing and monitoring work on allocated resources and scheduling work for future execution. You can read more about job scheduling on Amarel in the user guide [here](https://user-guide-f4258a.gitlab.io/jobs/).
 
 ### Slurm Basics
 
