@@ -57,7 +57,7 @@ These steps need to be performed before accessing Amarel for the first time.
 
 Follow the directions [here](https://user-guide-f4258a.gitlab.io/accounts/) to request an account through this [form](https://user-guide-f4258a.gitlab.io/). Note it will usually tae approximately 72 hours for accounts to be provisioned, and may take longer. Be sure to request an account early to provide time for provisioning.
 
-You will get an email when you account has been setup by the Amarel team. Your account name will look something like `<netID>@amarel.rutgers.com`.
+You will get an email when you account has been setup by the Amarel team. Your account name will look something like `<netID>@amarel.rutgers.edu`.
 
 Read the acceptable use policy [here](https://user-guide-f4258a.gitlab.io/accounts/policy/).
 
@@ -356,6 +356,12 @@ You can also see what Slurm partitions are associated with your user name.
 sacctmgr show assoc user="$USER"
 ```
 
+You can check the status of resources made available to you by placing a watch on `nvidia-smi`. Note you need to do this from the GPU node that has been allocated to you.
+
+```bash
+watch -n 1 nvidia-smi
+```
+
 ### Slurm Man Pages
 
 The Slurm man pages are available [here](https://slurm.schedmd.com/man_index.html).
@@ -533,3 +539,118 @@ PY
 
 This is not how you would normally run code on the cluster, but knowing how to run code snippets from the command line can be convenient when exploring a new system configuration. This snippet uses a GPU that the cluster has made available to you to perform a matrix multiplication. If this works, you are ready to start your first training run on the cluster!
 
+## Hello World: Train a Neural Network with Slurm
+
+Now that we have confirmed our Python environment is working and PyTorch can access an NVIDIA GPU, we are ready to submit a training job to the cluster.
+
+Previously, we used `srun` to launch an interactive session on a GPU node. This is convenient for exploring the cluster, but it is not ideal for larger training jobs. If our SSH session ends unexpectedly, our interactive session may also end!
+
+Instead, we will use `sbatch` to submit a *batch job*. Slurm will place the job in its queue, allocate resources when available, and execute our training script without requiring us to remain connected to the cluster.
+
+### Create a Training Script
+
+From your login node, navigate to the directory containing your Python environment.
+
+```bash
+cd ~/amarel-pytorch-test
+```
+
+Create a new Python file named `train.py`. We will use a small multilayer perceptron (MLP) to solve a synthetic classification problem so we do not need to deal with the complexities of downloading a dataset in this introduction.
+
+```python
+import time
+
+import torch
+from torch import nn
+
+# Require an NVIDIA GPU
+assert torch.cuda.is_available(), "CUDA is unavailable"
+device = torch.device("cuda")
+
+print("PyTorch:", torch.__version__, flush=True)
+print("GPU:", torch.cuda.get_device_name(0), flush=True)
+
+# Generate synthetic classification data
+torch.manual_seed(42)
+
+x = torch.randn(10000, 100, device=device)
+y = (x[:, :10].sum(dim=1) > 0).long()
+
+# Define a simple MLP
+model = nn.Sequential(
+    nn.Linear(100, 256),
+    nn.ReLU(),
+    nn.Linear(256, 256),
+    nn.ReLU(),
+    nn.Linear(256, 2),
+).to(device)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+loss_fn = nn.CrossEntropyLoss()
+
+# Train the model
+torch.cuda.synchronize()
+start = time.perf_counter()
+
+for epoch in range(100):
+    optimizer.zero_grad()
+
+    output = model(x)
+    loss = loss_fn(output, y)
+
+    loss.backward()
+    optimizer.step()
+
+    if epoch % 10 == 0:
+        print(f"Epoch {epoch:3d} | Loss: {loss.item():.4f}", flush=True)
+
+torch.cuda.synchronize()
+elapsed = time.perf_counter() - start
+
+print(f"Training time: {elapsed:.2f} seconds")
+print(f"Peak GPU memory: {torch.cuda.max_memory_allocated() / 1e9:.3f} GB")
+
+# Save the trained model
+torch.save(model.state_dict(), "model.pt")
+print("Training complete!")
+```
+
+Note that we had to move both the training data and the model to the GPU using device="cuda" and .to(device). Without this, PyTorch operations would execute on the CPU by default.
+
+We also use torch.cuda.synchronize() when measuring execution time because CUDA operations execute asynchronously. Synchronization ensures that GPU operations have completed before we record the elapsed time.
+
+### Create a Slurm Batch Script
+
+Next, create a shell script named `train.sh` in the same directory.
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=pytorch-demo
+#SBATCH --partition=gpu
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=2
+#SBATCH --gres=gpu:1
+#SBATCH --mem=8G
+#SBATCH --time=00:15:00
+#SBATCH --output=training-%j.out
+
+set -e
+
+# Navigate to the project directory
+cd "$SLURM_SUBMIT_DIR"
+
+# Print information about the allocated resources
+echo "Job ID: $SLURM_JOB_ID"
+echo "Hostname: $(hostname)"
+echo "Start time: $(date)"
+
+nvidia-smi
+
+# Run the training script
+./.venv/bin/python -u train.py
+
+echo "End time: $(date)"
+```
+
+The lines beginning with #SBATCH are instructions to Slurm that specify the resources required by our job. We request one GPU, two CPU cores, 8 GB of system RAM, and a maximum execution time of 15 minutes. The `#SBATCH` directives are read by Slurm when the job is submitted and specify our required computing resources. They are not comments (even though they look like them)! You can read more about `#SBATCH` directives in the [Slurm documentation](https://slurm.schedmd.com/sbatch.html).
