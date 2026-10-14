@@ -410,7 +410,7 @@ uv 0.13.0 (x86_64-unknown-linux-gnu)
 [<netID>@amarel3 ~]$
 ```
 
-If everything works, make add the path modification to your `.bashrc` for future sessions.
+If everything works, add the path modification to your `.bashrc` for future sessions.
 
 ```bash
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
@@ -418,9 +418,9 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
 ### Install `uv` Managed Python
 
-With `uv` installed, you can install whatever version of Python you need for your own projects without affecting the Amael system Python.
+With `uv` installed, you can install whatever version of Python you need for your own projects without affecting the Amarel system Python installations that are shared between users.
 
-Install Python 3.12.
+Install Python 3.12 (or your desired version).
 
 ```bash
 uv python install 3.12
@@ -434,11 +434,7 @@ uv python list --only-installed
 
 ### Create a Test Virtual Environment
 
-Now we will built a test virtual environment to confirm we can work with PyTorch and other Python packages.
-
---
-
-Make sure that you can use `uv` to install Python packages.
+Now we will built a test virtual environment to confirm we can work with PyTorch and other Python packages. First, make sure that you can use `uv` to install Python packages.
 
 ```bash
 mkdir -p ~/amarel-pytorch-test
@@ -446,7 +442,7 @@ cd ~/amarel-pytorch-test
 uv venv --python 3.12
 ```
 
-Test the interpretter you created
+If everything is set up correctly, you should see that a `.venv` has been created and you should be able to use the interpreter in that virtual environment. Test the interpreter you created by confirming the version of Python is it using.
 
 ```bash
 .venv/bin/python --version
@@ -454,15 +450,23 @@ Test the interpretter you created
 
 ### Install Basic Packages
 
+Now we want to confirm that we can install our required packages with `uv`. This will be the same process we follow when developing locally.
+
 ```bash
 uv pip install numpy
 ```
+
+Confirm NumPy has been installed.
 
 ```bash
 .venv/bin/python -c "import numpy; print(numpy.__version__)"
 ```
 
 ### Install GPU-Enabled PyTorch
+
+Now we will install GPU-enabled PyTorch. The configuration below is suggested.
+
+The `--index-url` argument tells the installer to get the version of packaged with Cuda 12.8.
 
 ```bash
 cd ~/amarel-pytorch-test
@@ -473,7 +477,7 @@ uv pip install \
     --index-url https://download.pytorch.org/whl/cu128
 ```
 
-Verify everything is working:
+Verify everything is working by printing the torch version and the Cuda version.
 
 ```bash
 .venv/bin/python -c \
@@ -482,7 +486,7 @@ Verify everything is working:
 
 ### Confirm PyTorch can Run on a GPU Node
 
-Request a GPU node
+Request a GPU node.
 
 ```bash
 srun --partition=gpu \
@@ -495,39 +499,28 @@ srun --partition=gpu \
      --pty bash
 ```
 
-From the GPU node, run
+From the shell that has now spawned on the GPU node, confirm that you are on the correct host and have access to GPU resources.
 
 ```bash
 hostname
 nvidia-smi
 ```
 
-to confirm you have GPUs allocated.
-
-From inside the `amarel-pytorch-test` directory, run a test script:
+From inside the `amarel-pytorch-test` directory, run a test script from the command line.
 
 ```bash
 .venv/bin/python - <<'PY'
 import torch
-
 print("PyTorch:", torch.__version__)
 print("CUDA build:", torch.version.cuda)
 print("CUDA available:", torch.cuda.is_available())
-
 assert torch.cuda.is_available(), "CUDA is unavailable"
-
 print("GPU:", torch.cuda.get_device_name(0))
-
-# Matrix multiplication on the GPU
 a = torch.randn(4096, 4096, device="cuda")
 b = torch.randn(4096, 4096, device="cuda")
-
 torch.cuda.synchronize()
-
 c = a @ b
-
 torch.cuda.synchronize()
-
 print("Result shape:", c.shape)
 print(
     "Peak allocated GPU memory:",
@@ -537,3 +530,6 @@ print(
 print("GPU test successful!")
 PY
 ```
+
+This is not how you would normally run code on the cluster, but knowing how to run code snippets from the command line can be convenient when exploring a new system configuration. This snippet uses a GPU that the cluster has made available to you to perform a matrix multiplication. If this works, you are ready to start your first training run on the cluster!
+
