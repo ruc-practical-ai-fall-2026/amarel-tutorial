@@ -130,7 +130,7 @@ ssh-keygen -R amarel.rutgers.edu
 
 ### Success
 
-Successful login will either show a welcome message or simply land you on the login server.
+A successful login will either show a welcome message or simply land you on the login server.
 
 **NOTE: the login server is NOT where you do work. The login server that you land on when you first login to Amarel is NOT the place where you should be running programs or attempting to perform larger computing jobs.**
 
@@ -138,7 +138,7 @@ The login server is a shared computing node that is less powerful than the machi
 
 On successful login, you should see a message like the following.
 
-```
+```text
 Last login: Wed Jul  8 11:11:14 2026 from 10.75.233.8
 ############################################################################
 ____ _  _ ____ ____ ____ _      ____ ___   ____ _  _ ___ ____ ____ ____ ____
@@ -212,83 +212,56 @@ You can use `ml avail` to list available Lmod packages. You can activate and Lmo
 
 ## Slurm and Job Scheduling Basics
 
-Amarel uses Slurm for cluster/resource management and job scheduling. Slurm is responsible for allocating resources to users, providing a framework for starting, executing and monitoring work on allocated resources and scheduling work for future execution. You can read more about job scheduling on Amarel in the user guide [here](https://user-guide-f4258a.gitlab.io/jobs/).
+Amarel uses Slurm for cluster resource management and job scheduling. Slurm is responsible for allocating resources to users, providing a framework for starting, executing and monitoring work on allocated resources and scheduling work for future execution. You can read more about job scheduling on Amarel in the user guide [here](https://user-guide-f4258a.gitlab.io/jobs/).
+
+In this class, our basic Slurm workflow is:
+1. Inspect resources available to you
+2. Submit jobs to partitions that meet your requirements
+3. Inspect those jobs to determine their status
+
+The Slurm basics and commands below will enable us to execute that workflow.
 
 ### Slurm Basics
 
-https://slurm.schedmd.com/quickstart.html
+The Slurm [quickstart guide](https://slurm.schedmd.com/quickstart.html) introduces Slurm as follows.
 
-"Slurm is an open source, fault-tolerant, and highly scalable cluster management and job scheduling system for large and small Linux clusters. Slurm requires no kernel modifications for its operation and is relatively self-contained. As a cluster workload manager, Slurm has three key functions. First, it allocates exclusive and/or non-exclusive access to resources (compute nodes) to users for some duration of time so they can perform work. Second, it provides a framework for starting, executing, and monitoring work (normally a parallel job) on the set of allocated nodes. Finally, it arbitrates contention for resources by managing a queue of pending work."
+*"Slurm is an open source, fault-tolerant, and highly scalable cluster management and job scheduling system for large and small Linux clusters. Slurm requires no kernel modifications for its operation and is relatively self-contained. As a cluster workload manager, Slurm has three key functions. First, it allocates exclusive and/or non-exclusive access to resources (compute nodes) to users for some duration of time so they can perform work. Second, it provides a framework for starting, executing, and monitoring work (normally a parallel job) on the set of allocated nodes. Finally, it arbitrates contention for resources by managing a queue of pending work."*
 
-As depicted in Figure 1, Slurm consists of a slurmd daemon running on each compute node and a central slurmctld daemon running on a management node (with optional fail-over twin). The slurmd daemons provide fault-tolerant hierarchical communications. The user commands include: sacct, sacctmgr, salloc, sattach, sbatch, sbcast, scancel, scontrol, scrontab, sdiag, sh5util, sinfo, sprio, squeue, sreport, srun, sshare, sstat, strigger and sview. All of the commands can run anywhere in the cluster.
+*"As depicted in Figure 1, Slurm consists of a slurmd daemon running on each compute node and a central slurmctld daemon running on a management node (with optional fail-over twin). The slurmd daemons provide fault-tolerant hierarchical communications."*
 
 ![Alt text](images/arch.gif)
 
-The entities managed by these Slurm daemons, shown in Figure 2, include nodes, the compute resource in Slurm, partitions, which group nodes into logical (possibly overlapping) sets, jobs, or allocations of resources assigned to a user for a specified amount of time, and job steps, which are sets of (possibly parallel) tasks within a job.
+These *daemons*, or background processes, manage the nodes, compute resource in Slurm, and *partitions*, which group nodes into logical sets for user jobs to run on.
 
-Priority-ordered jobs are allocated nodes within a partition until the resources (nodes, processors, memory, etc.) within that partition are exhausted. Once a job is assigned a set of nodes, the user is able to initiate parallel work in the form of job steps in any configuration within the allocation. For instance, a single job step may be started that utilizes all nodes allocated to the job, or several job steps may independently use a portion of the allocation.
+Slurm will also manage the allocations of resources assigned to a user, the time those resources are allocated, and *job steps*, which are sets of (possibly parallel) tasks within a job.
 
-### Helpful Commands
+### Basic Commands
 
-sinfo reports the state of partitions and nodes managed by Slurm. It has a wide variety of filtering, sorting, and formatting options.
+The following commands are helpful to know.
 
-srun is used to submit a job for execution or initiate job steps in real time. srun has a wide variety of options to specify resource requirements, including: minimum and maximum node count, processor count, specific nodes to use or not use, and specific node characteristics (so much memory, disk space, certain required features, etc.). A job can contain multiple job steps executing sequentially or in parallel on independent or shared resources within the job's node allocation.
+`sinfo` reports the state of partitions and nodes managed by Slurm and provides sorting and filtering options.
 
-sbatch
-sbatch is used to submit a job script for later execution. The script will typically contain one or more srun commands to launch parallel tasks.
+`srun` is what we will use to submit a job for execution or initiate job steps interactively. We will see examples of `srun` in the following sections. `srun`provides configurability for the user jobs to specific minimum and maximum node count, processor count, specific nodes to use or not use, and node requirements such as memory or disk space available.
 
-When you submit the job, Slurm responds with the job's ID, which will be used to identify this job in reports from Slurm.
+`sbatch` is used to submit a job script for later execution. The script will typically contain one or more srun commands to launch parallel tasks.
 
-```bash
-$ sbatch job.sh
-Submitted batch job 123456
-```
+`squeue -u $USER` will show your jobs.
 
-123456 is the job ID.
+`scontrol show job 123456` will provide the reason a job is waiting.
 
+`squeue --start -j 123456` will provide an estimate of how long the job needs to wait before running.
 
-See your jobs for job ID 123456
-```bash
-squeue -u $USER           # See your jobs
-scontrol show job 123456  # Understand why a job is waiting
-squeue --start -j 123456  # Estimate its start time
-```
+These commands will support our three step workflow in enabling us to inspect partitions, run jobs, and check the status of those jobs.
 
-### Slurm Partitions
+### Slurm Workflow Step 1: Inspect Partitions
 
-https://user-guide-f4258a.gitlab.io/jobs/partitions/
-
-Whenever a job is run on a HPC system, it must be sent to one of the SLURM partition that defines a list of nodes and any additional settings such as Quality of Service (QoS) which sets resource limits.
+Cluster jobs need to be sent to a partition. A partition defines a list of nodes that the job can run on, given the requirements specified using `srun`.
 
 Before requesting resources (compute nodes), it can be helpful to see what resources are available and what cluster partitions to use for certain resources.
 
-Example of using the sinfo command:
+Use commands such as the following examples to explore what cluster resources are available to you.
 
-
-### Best Practices
-
-Consider putting related work into a single Slurm job with multiple job steps both for performance reasons and ease of management. Each Slurm job can contain a multitude of job steps and the overhead in Slurm for managing job steps is much lower than that of individual jobs.
-
-Job arrays are an efficient mechanism of managing a collection of batch jobs with identical resource requirements. Most Slurm commands can manage job arrays either as individual elements (tasks) or as a single entity (e.g. delete an entire job array in a single command).
-
-[job arrays](https://slurm.schedmd.com/job_array.html)
-
-
-### Slurm Man Pages
-
-https://slurm.schedmd.com/man_index.html
-
-
-### Citing Slurm
-
-We recommend citing the peer-reviewed paper from JSSPP 2023: Architecture of the Slurm Workload Manager.
-
-Jette, M.A., Wickberg, T. (2023). Architecture of the Slurm Workload Manager.
-In: Klusáček, D., Corbalán, J., Rodrigo, G.P. (eds) Job Scheduling Strategies
-for Parallel Processing. JSSPP 2023. Lecture Notes in Computer Science,
-vol 14283. Springer, Cham. https://doi.org/10.1007/978-3-031-43943-8_1
-
-## Explore the Cluster
+Get a summary of available partitions.
 
 ```bash
 # sinfo = get information about available partitions
@@ -296,48 +269,15 @@ vol 14283. Springer, Cham. https://doi.org/10.1007/978-3-031-43943-8_1
 sinfo -s
 ```
 
+Filter and display the GPU partition details, including nodes, available GPUs, and their current state.
+
 ```bash
 sinfo --partition=gpu --format="%N %G %T"
 ```
-- Filters and displays the GPU partition details, including nodes, available GPUs, and their current state.
 
-```bash
-# Show available GPU resources
-sinfo -o "%P %G %D %t"
-```
+### Slurm Workflow Step 2: Submit Jobs
 
-The -o flag specifies a custom output format, with each % code representing a particular field.
-Field	Meaning	Description
-%P	Partition	Name of the Slurm partition (queue). A * indicates the default partition.
-%G	GRES	Generic resources configured on the nodes, typically GPUs.
-%D	Nodes	Number of nodes represented by the row.
-%t	State	Current node state, such as idle, allocated, or mixed.
-
-PARTITION  GRES         NODES  STATE
-gpu*       gpu:a100:4   2      idle
-gpu        gpu:v100:4   3      mix
-gpu        gpu:a100:4   5      alloc
-cpu        (null)       10     idle
-
-This tells us:
-- 2 nodes have 4 A100 GPUs each and are idle.
-- 3 nodes have 4 V100 GPUs each and are partially allocated.
-- 5 nodes have 4 A100 GPUs each and are fully allocated.
-- 10 nodes have no GPU resources configured.
-
-```bash
-# Show your jobs
-squeue -u "$USER"
-```
-
-```bash
-# Show your Slurm associations
-sacctmgr show assoc user="$USER"
-```
-
-## Request a GPU Interactively
-
-Request a GPU:
+Request a GPU using `srun`. Use its arguments to specify your requirements. Here we request a node with one GPU, two CPUs per task, 8GB of memory, for 10 minutes. We specify we want to log onto this node with a Bash shell.
 
 ```bash
 srun --partition=gpu \
@@ -348,15 +288,13 @@ srun --partition=gpu \
      --pty bash
 ```
 
-Note you are now on a different host
+Note that if this command succeeds, you are now on a different host.
 
 ```bash
 hostname
 ```
 
-This should confirm you are on a GPU node, e.g., gpu017.amarel.rutgers.edu
-
-Run `nvidia-smi` to confirm available GPUs.
+This should confirm you are on a GPU node, e.g., `gpu017.amarel.rutgers.edu`. Once you have confirmed you are on the host node, run `nvidia-smi` to confirm available GPUs. You should see something like this.
 
 ```text
 Tue Oct 13 07:05:23 2026
@@ -393,19 +331,52 @@ Tue Oct 13 07:05:23 2026
 +-----------------------------------------------------------------------------------------+
 ```
 
-Exit the node when finished.
+Note that you will need to exit the node by typing `exit` when finished to get back to your log in shell.
+
+### Slurm Workflow Step 3: Check Status of Jobs
+
+When you submit the job, Slurm responds with the job's ID, which will be used to identify this job in reports from Slurm.
 
 ```bash
-exit
+$ sbatch job.sh
+Submitted batch job 123456
 ```
+
+123456 is the job ID. You can use the job ID to see your jobs, check their status or reason for not running yet, and get estimates of when your jobs will start. For example, to see info about your job ID 123456, do the following.
+
+```bash
+squeue -u $USER           # See your jobs
+scontrol show job 123456  # Understand why a job is waiting
+squeue --start -j 123456  # Estimate its start time
+```
+
+You can also see what Slurm partitions are associated with your user name.
+
+```bash
+# Show your Slurm associations
+sacctmgr show assoc user="$USER"
+```
+
+### Slurm Man Pages
+
+The Slurm man pages are available [here](https://slurm.schedmd.com/man_index.html).
+
+### Citing Slurm
+
+Slurm recommends the following citation for research using it.
+
+Jette, M.A., Wickberg, T. (2023). Architecture of the Slurm Workload Manager.
+In: Klusáček, D., Corbalán, J., Rodrigo, G.P. (eds) Job Scheduling Strategies
+for Parallel Processing. JSSPP 2023. Lecture Notes in Computer Science,
+vol 14283. Springer, Cham. https://doi.org/10.1007/978-3-031-43943-8_1
 
 ## Create a Python Environment
 
-Amarel allows users to install personal software.
-
-https://user-guide-f4258a.gitlab.io/software/installing-software/
+Now that we have confirmed we can access the cluster, request and access a partition, and submit jobs, we are ready to set up our cluster development environment. Amarel allows users to install personal software to facilitate this. You can read more about installing software on Amarel [here](https://user-guide-f4258a.gitlab.io/software/installing-software/).
 
 ### Install `uv`
+
+Start by adding a personal installation of `uv`. Run the following command from your login node.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh \
@@ -413,27 +384,31 @@ curl -LsSf https://astral.sh/uv/install.sh \
           UV_NO_MODIFY_PATH=1 sh
 ```
 
+This will download the `uv` installer and run it to install `uv`.
+
 ### Add `uv` to your `$PATH`
+
+Just as with our local development environment setup, we need to add `uv` to the `$PATH`.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Verify `uv` works with
+Verify `uv` works.
 
 ```bash
 uv --version
 which uv
 ```
 
-You should see something similar to
+You should see something similar to the following.
 
 ```bash
-[ms3978@amarel3 ~]$ uv --version
+[<netID>@amarel3 ~]$ uv --version
 uv 0.13.0 (x86_64-unknown-linux-gnu)
-[ms3978@amarel3 ~]$ which uv
+[<netID>@amarel3 ~]$ which uv
 ~/.local/bin/uv
-[ms3978@amarel3 ~]$
+[<netID>@amarel3 ~]$
 ```
 
 If everything works, make add the path modification to your `.bashrc` for future sessions.
@@ -444,17 +419,25 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
 ### Install `uv` Managed Python
 
+With `uv` installed, you can install whatever version of Python you need for your own projects without affecting the Amael system Python.
+
+Install Python 3.12.
+
 ```bash
 uv python install 3.12
 ```
 
-Verify with
+Verify the installation.
 
 ```bash
 uv python list --only-installed
 ```
 
-### Create a Test Environment
+### Create a Test Virtual Environment
+
+Now we will built a test virtual environment to confirm we can work with PyTorch and other Python packages.
+
+--
 
 Make sure that you can use `uv` to install Python packages.
 
