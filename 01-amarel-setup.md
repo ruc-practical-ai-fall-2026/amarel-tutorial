@@ -112,8 +112,7 @@ It is also possible that a host key has just been changed.
 The fingerprint for the ED25519 key sent by the remote host is
 SHA256:12341234123412341234123412341234123412341234
 Please contact your system administrator.
-Add correct host key in /c/Users/sanch/.ssh/known_hosts to get rid of this message.
-Offending ECDSA key in /c/Users/sanch/.ssh/known_hosts:5
+...
 Host key for amarel.rutgers.edu has changed and you have requested strict checking.
 Host key verification failed.
 ```
