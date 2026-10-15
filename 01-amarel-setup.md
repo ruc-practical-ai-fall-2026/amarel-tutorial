@@ -218,7 +218,7 @@ In this class, our basic Slurm workflow is:
 2. Submit jobs to partitions that meet your requirements
 3. Inspect those jobs to determine their status
 
-The Slurm basics and commands below will enable us to execute that workflow.
+The Slurm basics and commands below will enable us to execute that workflow. As we will see, there are two main ways that we can submit jobs in step 2: interactively (via `srun`) or scripted (via `sbatch`).
 
 ### Slurm Basics
 
@@ -268,13 +268,17 @@ Get a summary of available partitions.
 sinfo -s
 ```
 
-Filter and display the GPU partition details, including nodes, available GPUs, and their current state.
+The output will show the resources allocated (A), idle (I), in some other state, such as down or reserved (O), and the total number of resources (T) on each partition.
+
+You can customize the output of `sinfo`. The following command will filter the GPU nodes and show nodes, available GPUs, and their current state.
 
 ```bash
 sinfo --partition=gpu --format="%N %G %T"
 ```
 
 ### Slurm Workflow Step 2: Submit Jobs
+
+We will use two basic methods of submitting jobs in this class: interactive and batch. Interactive jobs are submitted with `srun`. This transfers to a shell running on a GPU partition where you can use its resources via the terminal or via launching applications (such as jupyter) from the terminal. Batch jobs are submitted with `sbatch` from a login node. We will cover interactive submission with `srun` here and then cover batch submission later.
 
 Request a GPU using `srun`. Use its arguments to specify your requirements. Here we request a node with one GPU, two CPUs per task, 8GB of memory, for 10 minutes. We specify we want to log onto this node with a Bash shell.
 
@@ -296,7 +300,6 @@ hostname
 This should confirm you are on a GPU node, e.g., `gpu017.amarel.rutgers.edu`. Once you have confirmed you are on the host node, run `nvidia-smi` to confirm available GPUs. You should see something like this.
 
 ```text
-Tue Oct 13 07:05:23 2026
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
 |-----------------------------------------+------------------------+----------------------+
@@ -304,21 +307,21 @@ Tue Oct 13 07:05:23 2026
 | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
 |                                         |                        |               MIG M. |
 |=========================================+========================+======================|
-|   0  NVIDIA GeForce RTX 3090        On  |   00000000:18:00.0 Off |                  N/A |
-| 37%   26C    P8             19W /  350W |       1MiB /  24576MiB |      0%      Default |
-|                                         |                        |                  N/A |
+|   0  NVIDIA A100-PCIE-40GB          On  |   00000000:17:00.0 Off |                    0 |
+| N/A   67C    P0            246W /  250W |    9623MiB /  40960MiB |    100%      Default |
+|                                         |                        |             Disabled |
 +-----------------------------------------+------------------------+----------------------+
-|   1  NVIDIA GeForce RTX 3090        On  |   00000000:3B:00.0 Off |                  N/A |
-| 31%   26C    P8             20W /  350W |       1MiB /  24576MiB |      0%      Default |
-|                                         |                        |                  N/A |
+|   1  NVIDIA A100-PCIE-40GB          On  |   00000000:31:00.0 Off |                    0 |
+| N/A   34C    P0             38W /  250W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
 +-----------------------------------------+------------------------+----------------------+
-|   2  NVIDIA GeForce RTX 3090        On  |   00000000:86:00.0 Off |                  N/A |
-| 31%   26C    P8             30W /  350W |       1MiB /  24576MiB |      0%      Default |
-|                                         |                        |                  N/A |
+|   2  NVIDIA A100-PCIE-40GB          On  |   00000000:B1:00.0 Off |                    0 |
+| N/A   30C    P0             38W /  250W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
 +-----------------------------------------+------------------------+----------------------+
-|   3  NVIDIA GeForce RTX 3090        On  |   00000000:AF:00.0 Off |                  N/A |
-| 30%   26C    P8             18W /  350W |       1MiB /  24576MiB |      0%      Default |
-|                                         |                        |                  N/A |
+|   3  NVIDIA A100-PCIE-40GB          On  |   00000000:CA:00.0 Off |                    0 |
+| N/A   31C    P0             36W /  250W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
 +-----------------------------------------+------------------------+----------------------+
 
 +-----------------------------------------------------------------------------------------+
@@ -326,7 +329,17 @@ Tue Oct 13 07:05:23 2026
 |  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
 |        ID   ID                                                               Usage      |
 |=========================================================================================|
-|  No running processes found                                                             |
+|    0   N/A  N/A           23980      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23981      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23982      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23983      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23984      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23985      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23986      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23987      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23988      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23989      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
+|    0   N/A  N/A           23990      C   ..._20261006/gromacs/bin/gmx_mpi        868MiB |
 +-----------------------------------------------------------------------------------------+
 ```
 
@@ -334,7 +347,22 @@ Note that you will need to exit the node by typing `exit` when finished to get b
 
 ### Slurm Workflow Step 3: Check Status of Jobs
 
-When you submit the job, Slurm responds with the job's ID, which will be used to identify this job in reports from Slurm.
+When you submit a job, Slurm responds with the job's ID, which will be used to identify this job in reports from Slurm.
+
+If you started the job interactively (as above):
+
+```bash
+$ srun --partition=gpu \
+     --gres=gpu:1 \
+     --cpus-per-task=2 \
+     --mem=8G \
+     --time=00:10:00 \
+     --pty bash
+srun: job 123456 queued and waiting for resources
+srun: job 123456 has been allocated resources
+```
+
+Or if you started the job via a batch script (as we will later in the tutorial):
 
 ```bash
 $ sbatch job.sh
@@ -615,6 +643,8 @@ torch.save(model.state_dict(), "model.pt")
 print("Training complete!")
 ```
 
+Consider using [Vim](https://www.vim.org/) or [https://www.nano-editor.org/](nano) to add to the file.
+
 Note that we had to move both the training data and the model to the GPU using device="cuda" and .to(device). Without this, PyTorch operations would execute on the CPU by default.
 
 We also use torch.cuda.synchronize() when measuring execution time because CUDA operations execute asynchronously. Synchronization ensures that GPU operations have completed before we record the elapsed time.
@@ -625,7 +655,7 @@ Next, create a shell script named `train.sh` in the same directory.
 
 ```bash
 #!/bin/bash
-#SBATCH --job-name=pytorch-demo
+#SBATCH --job-name=pytorch
 #SBATCH --partition=gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -654,3 +684,116 @@ echo "End time: $(date)"
 ```
 
 The lines beginning with #SBATCH are instructions to Slurm that specify the resources required by our job. We request one GPU, two CPU cores, 8 GB of system RAM, and a maximum execution time of 15 minutes. The `#SBATCH` directives are read by Slurm when the job is submitted and specify our required computing resources. They are not comments (even though they look like them)! You can read more about `#SBATCH` directives in the [Slurm documentation](https://slurm.schedmd.com/sbatch.html).
+
+### Submit Batch Jobs
+
+Recall our basic Slurm workflow:
+1. Inspect resources available to you
+2. Submit jobs to partitions that meet your requirements
+3. Inspect those jobs to determine their status
+
+Here we assume step 1 has already been performed. Previously, we used `srun` to submit jobs interactively. Now we will use `sbatch` to submit them in the background. Submitting batch jobs makes it easier to automate job submission via scripts and allows you to move on to other tasks while the job is scheduled and then run in the background.
+
+Exit the GPU node if you are still on it to return to the login node. Submit the training job from the login node.
+
+```bash
+sbatch train.sh
+```
+
+If the job submission is successful you will see something like the following message.
+
+```text
+Submitted batch job 123456
+```
+
+The number 123456 is the job ID assigned by Slurm. You can use this identifier to monitor your job and see its results.
+
+Unlike `srun --pty bash`, sbatch returns control to your terminal immediately after submission. The training job may begin immediately or remain in the queue until the requested resources become available.
+
+### Monitor the Job
+
+Now that the job has been submitted, we move onto the third step in our workflow and proceed to inspect and monitor our job.
+
+View the jobs associated with your account.
+
+```bash
+squeue -u $USER
+```
+
+You should see your job and its status. Typical job statuses include pending (PD), running (R), and completing (CG).
+
+Use `scontrol` to inspect a specific job given its job ID.
+
+```bash
+scontrol show job 123456
+```
+
+Use `squeue` to attempt to get an estimated state time for jobs that are pending.
+
+```bash
+squeue --start -j 123456
+```
+
+If you disconnect from the cluster (or if you accidentally leave!) your job should persist. Try exiting and logging back in. Then use `scontrol` to confirm your job is still running.
+
+Once the job is complete, an output file should be present in your project folder. View the output associated with your job by printing the file contents to the terminal.
+
+```bash
+cat training-123456.out
+```
+
+You should see something like the following.
+
+```text
+Job ID: 123456
+Hostname: gpu017.amarel.rutgers.edu
+Start time: ...
+
+GPU: NVIDIA GeForce RTX 3090
+Epoch   0 | Loss: ...
+Epoch  10 | Loss: ...
+Epoch  20 | Loss: ...
+...
+Epoch  90 | Loss: ...
+
+Training time: ... seconds
+Peak GPU memory: ... GB
+Training complete!
+End time: ...
+```
+
+You should also see the saved model file created by PyTorch, `model.pt` in this example.
+
+### View Resource Usage
+
+You can also use Slurm to view the resources that your job used.
+
+```bash
+sacct -j 123456 \
+    --format=JobID,JobName,State,Elapsed,AllocCPUS,ReqMem,MaxRSS,ExitCode
+```
+
+The fields above tell us:
+
+Some useful fields include:
+* **State**: Whether the job completed successfully, failed, or was cancelled.
+* **Elapsed**: Total wall-clock execution time.
+* **AllocCPUS**: Number of allocated CPU resources.
+* **MaxRSS**: Maximum reported resident system memory usage, where accounting is available.
+* **ExitCode**: Exit status of the process.
+
+Note that Elapsed includes more than just the neural network's training time. It includes startup, initialization, and any other work performed by the batch script.
+
+The MaxRSS value measures system memory rather than GPU memory. Our Python script separately reports peak GPU tensor memory usage through torch.cuda.max_memory_allocated().
+
+## Summary
+
+Now we have reviewed the basics of using Amarel to train models. We have learned how to:
+1. Log into the cluster.
+2. Prepare a Python development environment on the cluster.
+3. Inspect the cluster resources available to us.
+4. Use a partition interactively or submit batch jobs to it.
+5. Monitor job execution and inspect the output.
+
+These fundamentals give us the basic skills we will need to move on to training larger models and datasets.
+
