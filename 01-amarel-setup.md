@@ -55,7 +55,7 @@ These steps need to be performed before accessing Amarel for the first time.
 
 ### Request an Account
 
-Follow the directions [here](https://user-guide-f4258a.gitlab.io/accounts/) to request an account through this [form](https://user-guide-f4258a.gitlab.io/). Note it will usually tae approximately 72 hours for accounts to be provisioned, and may take longer. Be sure to request an account early to provide time for provisioning.
+Follow the directions [here](https://it.rutgers.edu/research-computing/amarel-cluster-access-request/) to request an account. You may need to enter your Rutgers credentials. Note it will usually tae approximately 72 hours for accounts to be provisioned, and may take longer. Be sure to request an account early to provide time for provisioning.
 
 You will get an email when you account has been setup by the Amarel team. Your account name will look something like `<netID>@amarel.rutgers.edu`.
 
