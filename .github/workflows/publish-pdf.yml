@@ -1,0 +1,83 @@
+
+name: Publish Amarel Tutorial PDF
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Pandoc and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pandoc \
+            texlive-xetex \
+            texlive-latex-extra \
+            fonts-lmodern
+
+      - name: Generate PDF
+        run: |
+          mkdir -p _site
+
+          pandoc 01-amarel-setup.md \
+            -o _site/amarel-tutorial.pdf \
+            --pdf-engine=xelatex \
+            --lua-filter=pandoc-title.lua \
+            --include-in-header=pandoc-header.tex \
+            --toc \
+            --toc-depth=2
+
+      - name: Create download page
+        run: |
+          cat > _site/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Amarel Tutorial</title>
+          </head>
+          <body>
+            <h1>Amarel Tutorial</h1>
+            <p><a href="amarel-tutorial.pdf">View or Download PDF</a></p>
+          </body>
+          </html>
+          EOF
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

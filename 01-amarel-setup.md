@@ -1,10 +1,10 @@
 # Amarel Tutorial
 
+## 1 About
+
 One of the training and inference infrastructure options we will use in this class for larger workloads is Rutgers' own [Amarel](https://it.rutgers.edu/research-computing/amarel/) computing cluster, created and managed by the Office of Advanced Research Computing (OARC). As distinct from the *local development* options we have encountered so far, Amarel provides a shared *cluster* or group of networked computers that you can access to perform training runs using more GPUs than would be practical with your local setup. (Unless you have a *very* high-end home setup!) While research groups can purchase their own dedicated Amarel resources, a general access category is provided free to Rutgers students and faculty.
 
 You can learn more about Amarel in the [user guide](https://user-guide-f4258a.gitlab.io/). This tutorial loosely follows the user guide and other relevant resources to briefly introduce Amarel, walk through requesting an account, accessing the cluster, confirming you can configure a Python development environment that mirrors that which we have been using in class, and run Hello World training examples. As we move toward training larger networks with more parameters on larger datasets, which will demand more storage, memory, and compute (operations per second) than is practical on our laptops, Amarel will be one of the options available to us to *scale* our systems.
-
-## 1 About
 
 The Amarel [webpage](https://it.rutgers.edu/research-computing/amarel/#about-amarel) introduces Amarel as follows.
 
@@ -228,7 +228,7 @@ The Slurm [quickstart guide](https://slurm.schedmd.com/quickstart.html) introduc
 
 *"As depicted in Figure 1, Slurm consists of a slurmd daemon running on each compute node and a central slurmctld daemon running on a management node (with optional fail-over twin). The slurmd daemons provide fault-tolerant hierarchical communications."*
 
-![Alt text](images/arch.gif)
+![](images/arch.gif)
 
 These *daemons*, or background processes, manage the nodes, compute resources in Slurm, and *partitions*, which group nodes into logical sets for user jobs to run on.
 
