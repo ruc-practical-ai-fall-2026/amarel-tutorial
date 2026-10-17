@@ -1004,7 +1004,7 @@ ls -al
 
 You should see `train.py`, `train.sh`, and `train.ipynb` along with the files `uv` needs to build your environment: `uv.lock` and `pyproject.toml`.
 
-### Step 2: Create Your Virtual Environment
+### Step 3: Create Your Virtual Environment
 
 From the `amarel-example-project` folder, create your virtual environment from the specifications in the `.toml`.
 
@@ -1014,7 +1014,7 @@ uv sync --locked
 
 This automates setting up your Python environment, just as it does when developing locally.
 
-### Step 3: Kick Off a Batch Job
+### Step 4: Kick Off a Batch Job
 
 Our example project already includes the Slurm batch script `train.sh`. Before submitting it, inspect its contents.
 
@@ -1046,7 +1046,7 @@ cat training-123456.out
 
 You should see the training loss reported periodically, along with the GPU information, total training time, and peak GPU memory usage. The trained model checkpoint, `model.pt`, should also be saved in the project directory.
 
-### Step 4: (Optional) Serve Up a Jupyter Notebook
+### Step 5: (Optional) Serve Up a Jupyter Notebook
 
 We can also open the notebook included in the repository using the Jupyter workflow introduced earlier.
 
