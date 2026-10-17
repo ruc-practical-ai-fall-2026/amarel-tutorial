@@ -786,6 +786,139 @@ Note that Elapsed includes more than just the neural network's training time. It
 
 The MaxRSS value measures system memory rather than GPU memory. Our Python script separately reports peak GPU tensor memory usage through torch.cuda.max_memory_allocated().
 
+## (Optional) Serve a Jupyter Notebook with Amarel Resources
+
+So far, we have used Amarel resources interactively with `srun` or submitted batch jobs with `sbatch`. Though not required, it is also possible launch a Jupyter server so that we can run Jupyter in our browser with access to Amarel resources. To do this, we will launch a Jupyter server on an allocated GPU compute node and establish an SSH tunnel that allows our local browser to communicate with that server.
+
+### Step 1: Install Jupyter
+
+From your Amarel login node, navigate to the Python environment we created earlier.
+
+```bash
+cd ~/amarel-pytorch-test
+uv pip install jupyterlab ipykernel
+```
+
+### Step 2: Request a GPU Node
+
+Request an interactive GPU session using Slurm, just as we did earlier.
+
+```bash
+srun --partition=gpu \
+     --nodes=1 \
+     --ntasks=1 \
+     --gres=gpu:1 \
+     --cpus-per-task=2 \
+     --mem=8G \
+     --time=01:00:00 \
+     --pty bash
+```
+
+We have increased the allocation time to one hour to allow for an interactive notebook session.
+
+Once connected, confirm the compute node hostname and GPU availability.
+
+```bash
+hostname
+nvidia-smi
+```
+
+Record the hostname, which should resemble gpu017.amarel.rutgers.edu. We will use it when configuring our SSH tunnel.
+
+### Step 3: Launch Jupyter
+
+From the compute node, navigate to your project directory and start JupyterLab.
+
+```bash
+cd ~/amarel-pytorch-test
+./.venv/bin/jupyter lab \
+    --no-browser \
+    --ip=127.0.0.1 \
+    --port=8888
+```
+
+This starts a Jupyter server on the compute node without attempting to open a browser.
+
+The `--ip=127.0.0.1` argument restricts Jupyter to the compute node's loopback interface, while `--port=8888` specifies the network port on which it will listen.
+
+You should see output containing a URL similar to:
+
+```text
+http://127.0.0.1:8888/lab?token=<your_token>
+```
+
+Keep this terminal open. Closing Jupyter will terminate the notebook server.
+
+### Step 4: Establish an SSH Tunnel
+
+Open a new terminal on your local computer, not on Amarel.
+
+We will use SSH port forwarding to connect our local computer to the compute node through the Amarel login node.
+
+```bash
+ssh -N \
+    -J <netID>@amarel.rutgers.edu \
+    -L 8888:localhost:8888 \
+    <netID>@<compute_node>
+```
+
+Replace `<netID>` with your Rutgers NetID and `<compute_node>` with the compute node hostname recorded earlier.
+
+For example:
+
+```bash
+ssh -N \
+    -J ms3978@amarel.rutgers.edu \
+    -L 8888:localhost:8888 \
+    ms3978@gpu029.amarel.rutgers.edu
+```
+
+Here, `-J` specifies an SSH jump host, allowing us to reach the compute node through the login node. The `-L` option forwards port 8888 on our local computer to port 8888 on the compute node. The `-N` option tells SSH not to execute any commands on the remote system since we only need the connection for port forwarding.
+
+This enables forwarding from your local computer through the login node to the GPU node:
+
+```text
+     [Local Computer]     --->     [Login Node]       --->      [GPU Node]
+ Browser - localhost:8888       SSH jump host (`-J`)        Jupyter - Port 8888
+```
+
+### Step 5: Open Jupyter in Your Browser
+
+Once the SSH tunnel is established, open a browser on your local computer and navigate to:
+
+```text
+http://localhost:8888/lab?token=<your_token>
+```
+
+Replace `<your_token>` with the token displayed when you launched Jupyter.
+
+You should now see the JupyterLab interface. Open a new Python notebook and select the Python kernel from your virtual environment.
+
+Test GPU availability in a notebook cell:
+
+```python
+import torch
+
+print("CUDA available:", torch.cuda.is_available())
+print("GPU:", torch.cuda.get_device_name(0))
+```
+
+If everything is configured correctly, the notebook will execute using the GPU allocated to your interactive Slurm job.
+
+### Step 6: Close the Session
+
+When finished, shut down the Jupyter server using Ctrl+C in the terminal where you launched it.
+
+Close the SSH tunnel using Ctrl+C in your local terminal, then exit the interactive Slurm session.
+
+```bash
+exit
+```
+
+Remember that GPU allocations are shared resources. Be kind to the other people using the cluster and only request the amount of time you need. Do not leave interactive sessions running when you are no longer using them.
+
+
+
 ## Summary
 
 Now we have reviewed the basics of using Amarel to train models. We have learned how to:
