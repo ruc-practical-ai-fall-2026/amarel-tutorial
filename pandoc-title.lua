@@ -1,3 +1,4 @@
+
 function Pandoc(doc)
   if #doc.blocks == 0 then
     return doc
@@ -10,6 +11,17 @@ function Pandoc(doc)
     doc.meta.title = pandoc.MetaInlines(first.content)
     table.remove(doc.blocks, 1)
   end
+
+  -- Add document metadata
+  doc.meta.author = pandoc.MetaInlines({
+    pandoc.Str("Mauro J. Sanchirico III"),
+    pandoc.LineBreak(),
+    pandoc.Str("ms3978@camden.rutgers.edu")
+  })
+
+  doc.meta.date = pandoc.MetaInlines({
+    pandoc.Str("2026")
+  })
 
   -- Promote remaining headings by one level
   for _, block in ipairs(doc.blocks) do

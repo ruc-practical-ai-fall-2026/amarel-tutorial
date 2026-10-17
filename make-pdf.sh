@@ -1,4 +1,5 @@
 pandoc 01-amarel-setup.md \
+    -f gfm \
     -o amarel-tutorial.pdf \
     --pdf-engine=xelatex \
     --lua-filter=pandoc-title.lua \
