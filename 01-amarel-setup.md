@@ -929,7 +929,51 @@ In this example, we will clone the repository containing this tutorial and use t
 - `train.sh`: The Slurm batch script used to submit the training job.
 - `train.ipynb`: A Jupyter notebook containing the same training example.
 
-### Step 1: Clone This Repository from Amarel
+### Step 1: Configure GitHub Authentication on Amarel
+
+If you plan to push changes to GitHub from Amarel, you will need to configure authentication. GitHub does not support password authentication for Git operations over HTTPS. We will use **SSH keys** to authenticate from Amarel. Note that you do not need authentication to clone or pull from public repositories.
+
+From your Amarel login node, generate a new SSH key.
+
+```bash
+ssh-keygen -t ed25519 -C "amarel-github"
+```
+
+Press Enter to accept the default file location (`~/.ssh/id_ed25519`), unless a key already exists. If so, choose a different filename to avoid overwriting it.
+
+Display your public key.
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+Copy the output and navigate to [GitHub SSH Keys](https://github.com/settings/keys). Select **New SSH key**, provide a descriptive name such as `Rutgers Amarel`, and paste your public key.
+
+Never share your private key (the file without `.pub`).
+
+Test authentication from Amarel.
+
+```bash
+ssh -T git@github.com
+```
+
+On your first connection, verify GitHub's host fingerprint against its [published SSH fingerprints](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints) before accepting it. If authentication works, GitHub will display a message confirming your username.
+
+When cloning repositories you intend to push to, use the SSH URL rather than HTTPS.
+
+```bash
+git clone git@github.com:<organization>/<repository>.git
+```
+
+If you already cloned a repository using HTTPS, change its remote URL from inside the repository.
+
+```bash
+git remote set-url origin git@github.com:<organization>/<repository>.git
+```
+
+You should now be able to use `git pull` and `git push` from Amarel, provided your GitHub account has access to the repository. If you configured a passphrase, you may use `ssh-agent` to avoid entering it repeatedly during your session. See [GitHub's SSH authentication documentation](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) for additional guidance.
+
+### Step 2: Clone This Repository from Amarel
 
 Log into Amarel through SSH as we did earlier.
 
@@ -944,7 +988,7 @@ cd ~
 git clone <repository_url>
 ```
 
-Replace `<repository_url>` with the GitHub HTTPS or SSH URL for this tutorial's repository.
+Replace `<repository_url>` with the GitHub HTTPS or SSH URL for this tutorial's repository. Use SSH if you intend to modify the repository.
 
 Navigate to the example project.
 
@@ -968,7 +1012,7 @@ From the `amarel-example-project` folder, create your virtual environment from t
 uv sync --locked
 ```
 
-This automates setting up your Python environment for us, just as it did for us when developing locally.
+This automates setting up your Python environment, just as it does when developing locally.
 
 ### Step 3: Kick Off a Batch Job
 
@@ -1000,7 +1044,7 @@ Once the job completes, inspect the output file.
 cat training-123456.out
 ```
 
-You should see the training loss reported periodically, along with the GPU information, total training time, and peak GPU memory usage. The trained model checkpoint, `model.pt`, should also be saved in the project directory. You have now executed code directly from a Git repository using Amarel's GPU resources!
+You should see the training loss reported periodically, along with the GPU information, total training time, and peak GPU memory usage. The trained model checkpoint, `model.pt`, should also be saved in the project directory.
 
 ### Step 4: (Optional) Serve Up a Jupyter Notebook
 
@@ -1028,7 +1072,7 @@ cd ~/amarel-tutorial/amarel-example-project
 Launch JupyterLab using the environment we created earlier.
 
 ```bash
-$HOME/amarel-pytorch-test/.venv/bin/jupyter lab \
+$HOME/amarel-tutorial/amarel-example-project/.venv/bin/jupyter lab \
     --no-browser \
     --ip=127.0.0.1 \
     --port=8888
@@ -1051,59 +1095,13 @@ Open the Jupyter URL in your local browser.
 http://localhost:8888/lab?token=<your_token>
 ```
 
+Note if you are using a terminal in VSCode, you can also click the link and open JupyterLab in VSCode.
+
 Navigate to `train.ipynb` and open it. Make sure the selected Python kernel corresponds to the environment containing PyTorch.
 
 You can now run the notebook interactively while its Python code executes on the GPU node allocated by Slurm.
 
 When finished, stop Jupyter, close the SSH tunnel, and exit the GPU allocation to release the resources for other users.
-
-### Configure GitHub Authentication on Amarel
-
-If you plan to push changes to GitHub from Amarel, you will need to configure authentication. GitHub does not support password authentication for Git operations over HTTPS. We will use **SSH keys** to authenticate from Amarel. Note that you do not need authentication to clone or pull from public repositories.
-
-From your Amarel login node, generate a new SSH key.
-
-```bash
-ssh-keygen -t ed25519 -C "amarel-github"
-```
-
-Press Enter to accept the default file location (`~/.ssh/id_ed25519`), unless a key already exists. If so, choose a different filename to avoid overwriting it.
-
-Display your public key.
-
-```bash
-cat ~/.ssh/id_ed25519.pub
-```
-
-Copy the output and navigate to [GitHub SSH Keys](https://github.com/settings/keys). Select **New SSH key**, provide a descriptive name such as `Rutgers Amarel`, and paste your public key.
-
-Never share your private key (the file without `.pub`).
-
-Test authentication from Amarel.
-
-```bash
-ssh -T git@github.com
-```
-
-On your first connection, verify GitHub's host fingerprint against its [published SSH fingerprints](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints) before accepting it. If authentication works, GitHub will display a message confirming your username.
-
-**Step 4: Configure Your Repository**
-
-When cloning repositories you intend to push to, use the SSH URL rather than HTTPS.
-
-```bash
-git clone git@github.com:<organization>/<repository>.git
-```
-
-If you already cloned a repository using HTTPS, change its remote URL from inside the repository.
-
-```bash
-git remote set-url origin git@github.com:<organization>/<repository>.git
-```
-
-You should now be able to use `git pull` and `git push` from Amarel, provided your GitHub account has access to the repository.
-
-If you configured a passphrase, you may use `ssh-agent` to avoid entering it repeatedly during your session. See [GitHub's SSH authentication documentation](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) for additional guidance.
 
 ### Keeping Your Repository Updated
 
@@ -1129,6 +1127,7 @@ Your updated code is now available to execute on the cluster.
 **Note:** As with local development, avoid committing virtual environments, large datasets, and model checkpoints to Git. These should generally remain outside version control, with `.gitignore` configured appropriately.
 
 ## Connect VSCode to Amarel
+
 
 
 ## Summary
