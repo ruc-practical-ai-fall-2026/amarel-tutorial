@@ -1,8 +1,8 @@
 # Amarel Tutorial
 
-One of the training and inference infrastructure options we will use in this class for larger workloads is Rutgers' own [Amarel](https://it.rutgers.edu/research-computing/amarel/) computing cluster, created and managed by the Office of Advanced Research Computing (OARC). As distinct from the *local development* options we have encountered so far, Amarel provides a shared *cluster* or group of networked computers that you can access to perform training runs using more GPUs than would be practical with your local setup. (Unless you have a *very* high end home set up!) While research groups can purchase their own dedicated Amarel resources, a general access category is provided free to Rutgers students and faculty.
+One of the training and inference infrastructure options we will use in this class for larger workloads is Rutgers' own [Amarel](https://it.rutgers.edu/research-computing/amarel/) computing cluster, created and managed by the Office of Advanced Research Computing (OARC). As distinct from the *local development* options we have encountered so far, Amarel provides a shared *cluster* or group of networked computers that you can access to perform training runs using more GPUs than would be practical with your local setup. (Unless you have a *very* high-end home setup!) While research groups can purchase their own dedicated Amarel resources, a general access category is provided free to Rutgers students and faculty.
 
-You can learn more about Amarel in the [user guide](https://user-guide-f4258a.gitlab.io/). This tutorial loosely follows the user guide and other relevant resources to briefly introduce Amarel, walk through requesting an account, accessing the cluster, confirming you can configure a Python development environment that mirrors that which we have been using in class, and run Hello World training examples. As we move toward training larger networks with more parameters on larger datasets, which will demand more storage, memory, and compute (operations per second) than practical on our laptops, Amarel will be on of the options available to us to *scale* our systems.
+You can learn more about Amarel in the [user guide](https://user-guide-f4258a.gitlab.io/). This tutorial loosely follows the user guide and other relevant resources to briefly introduce Amarel, walk through requesting an account, accessing the cluster, confirming you can configure a Python development environment that mirrors that which we have been using in class, and run Hello World training examples. As we move toward training larger networks with more parameters on larger datasets, which will demand more storage, memory, and compute (operations per second) than is practical on our laptops, Amarel will be one of the options available to us to *scale* our systems.
 
 ## 1 About
 
@@ -16,7 +16,7 @@ An overview of the resources Amarel provides is given in the user manual [here](
 
 ### 1.1 Maintenance Schedule
 
-Amarel follows a tentative maintenance schedule with maintenance outages spanning up to 2 days each month, starting on the 3rd Tuesday of the month. In some cases the maintenance period ends early, but in general each maintenance period is expected to begin at about 08:00 ET on the first day and end by about 23:59 ET on the 2nd day. You can get more information about Amarel current status and maintenance periods [here](https://it.rutgers.edu/research-computing/amarel-system-status/).
+Amarel follows a tentative maintenance schedule with maintenance outages spanning up to 2 days each month, starting on the 3rd Tuesday of the month. In some cases the maintenance period ends early, but in general each maintenance period is expected to begin at about 08:00 ET on the first day and end by about 23:59 ET on the 2nd day. You can get more information about Amarel's current status and maintenance periods [here](https://it.rutgers.edu/research-computing/amarel-system-status/).
 
 ### 1.2 Quick Resources
 
@@ -55,9 +55,9 @@ These steps need to be performed before accessing Amarel for the first time.
 
 ### 3.1 Request an Account
 
-Follow the directions [here](https://it.rutgers.edu/research-computing/amarel-cluster-access-request/) to request an account. You may need to enter your Rutgers credentials. Note it will usually tae approximately 72 hours for accounts to be provisioned, and may take longer. Be sure to request an account early to provide time for provisioning.
+Follow the directions [here](https://it.rutgers.edu/research-computing/amarel-cluster-access-request/) to request an account. You may need to enter your Rutgers credentials. Note it will usually take approximately 72 hours for accounts to be provisioned, and may take longer. Be sure to request an account early to provide time for provisioning.
 
-You will get an email when you account has been setup by the Amarel team. Your account name will look something like `<netID>@amarel.rutgers.edu`.
+You will get an email when your account has been set up by the Amarel team. Your account name will look something like `<netID>@amarel.rutgers.edu`.
 
 Read the acceptable use policy [here](https://user-guide-f4258a.gitlab.io/accounts/policy/).
 
@@ -75,7 +75,7 @@ Launch the VPN software you installed previously and provide your credentials. Y
 
 ### 4.2 SSH into the Login Node
 
-Open a terminal (either in VS Code or a standalone terminal) and follow the directions [here](https://user-guide-f4258a.gitlab.io/connect/) to use SSH (secure shell) to connect to Amarel. If you are new to SSH, SSH provides a means to remotely connect to other computers. When you use SSH to connect to another computer, you will start a shell that runs on that computer and has access to its files. You will need to exit this shell with `exit` to return to your local shell (or which ever shell you started your SSH session from).
+Open a terminal (either in VS Code or a standalone terminal) and follow the directions [here](https://user-guide-f4258a.gitlab.io/connect/) to use SSH (secure shell) to connect to Amarel. If you are new to SSH, SSH provides a means to remotely connect to other computers. When you use SSH to connect to another computer, you will start a shell that runs on that computer and has access to its files. You will need to exit this shell with `exit` to return to your local shell (or whichever shell you started your SSH session from).
 
 SSH into the Amarel login node.
 
@@ -85,14 +85,14 @@ ssh <netID>@amarel.rutgers.edu
 
 ### 4.3 Issue: Could Not Resolve Hostname
 
-If you see an error like the following one this likely means that you are not on the Rutgers network.
+If you see an error like the following one, this likely means that you are not on the Rutgers network.
 
 ```bash
 $ ssh <netID>@amarel.rutgers.edu
 ssh: Could not resolve hostname amarel.rutgers.edu: Name or service not known
 ```
 
-If you are not physically on campus, this likely means you need to connect to the Rutgers VPN. If you are physically on campus, this might mean you are connected another network besides the Rutgers network, such as a personal hot spot.
+If you are not physically on campus, this likely means you need to connect to the Rutgers VPN. If you are physically on campus, this might mean you are connected to another network besides the Rutgers network, such as a personal hot spot.
 
 ### 4.4 Issue: Remote Host Identification Changed
 
@@ -117,11 +117,11 @@ Host key for amarel.rutgers.edu has changed and you have requested strict checki
 Host key verification failed.
 ```
 
-If you see this message, it likely means you need to cycle your SSH keys.
+If you see this message, the server's SSH host key no longer matches the key saved on your computer. This may be due to a legitimate server configuration change, but you should verify the new fingerprint before updating your saved host key.
 
-Confirm the fingerprint with your instructor or another administrator. For good security practice, avoid bypassing this using `StrictHostChecking=no`.
+Confirm the fingerprint with your instructor or another administrator. For good security practice, avoid bypassing this using `StrictHostKeyChecking=no`.
 
-If you have confirmed you are connecting to the right server with your instructor, use the following command to cycle keys.
+If you have confirmed you are connecting to the correct server with your instructor, use the following command to remove the old host key. SSH will prompt you to accept the new key on your next connection.
 
 ```bash
 ssh-keygen -R amarel.rutgers.edu
@@ -133,7 +133,7 @@ A successful login will either show a welcome message or simply land you on the 
 
 **NOTE: the login server is NOT where you do work. The login server that you land on when you first login to Amarel is NOT the place where you should be running programs or attempting to perform larger computing jobs.**
 
-The login server is a shared computing node that is less powerful than the machines that actually perform heavy computing jobs on Amarel. Many other people are likely on the server at the same time as you are. If you attempt to perform intensive work from this server (e.g., training a large model). As we will see next, we will use the tools on Amarel to request a partition of the GPU servers available and use these servers to do our work.
+The login server is a shared computing node that is less powerful than the machines that actually perform heavy computing jobs on Amarel. Many other people are likely on the server at the same time as you are. If you attempt to perform intensive work on this server (e.g., training a large model), you will block other users from using the node for its correct administrative and login functions. As we will see next, we will use the tools on Amarel to request GPU resources from the available partitions and use these resources to do our work.
 
 On successful login, you should see a message like the following.
 
@@ -162,7 +162,7 @@ login nodes (amarel1, amarel2, etc.). That's what compute nodes are for.
 
 ### 4.6 Confirm You are Logged in Correctly
 
-Once you see the message above, you can explore the login node (again, not this is NOT where you do work) to confirm everything is working as expected.
+Once you see the message above, you can explore the login node (again, note this is NOT where you do work) to confirm everything is working as expected.
 
 Start by printing the hostname.
 
@@ -197,17 +197,17 @@ These login nodes are shared by many users and are intended for light administra
 
 ### 4.7 Understand Your Shell Environment
 
-If you need a review of how the shell environment works reference prior course materials along with the tutorial in the Amarel user guide [here](https://user-guide-f4258a.gitlab.io/environment/shell_startup/).
+If you need a review of how the shell environment works, reference prior course materials along with the tutorial in the Amarel user guide [here](https://user-guide-f4258a.gitlab.io/environment/shell_startup/).
 
 ### 4.8 (Optional) View and Load Modules with Lmod
 
-Users are free to install their own software on Amarel (see directions in the following sections) however Amarel also provides Lmod for automated package management and development environment configuration.
+Users are free to install their own software on Amarel (see directions in the following sections); however, Amarel also provides Lmod for automated package management and development environment configuration.
 
 You can read about Lmod in the [official documentation](https://lmod.readthedocs.io/en/latest/index.html) and [official user guide](https://lmod.readthedocs.io/en/latest/010_user.html). The Amarel user guide provides a [tutorial](https://user-guide-f4258a.gitlab.io/environment/lmod/) on using Lmod.
 
 You are welcome to use Lmod where it makes sense for your projects. In this tutorial we will review standing up a custom Python development environment similar to the environment we have already been using in class.
 
-You can use `ml avail` to list available Lmod packages. You can activate and Lmod environment with `ml <name>`, i.e., `ml cuda` or `ml gcc`.
+You can use `ml avail` to list available Lmod packages. You can activate an Lmod environment with `ml <name>`, i.e., `ml cuda` or `ml gcc`.
 
 ## 5 Slurm and Job Scheduling Basics
 
@@ -230,7 +230,7 @@ The Slurm [quickstart guide](https://slurm.schedmd.com/quickstart.html) introduc
 
 ![Alt text](images/arch.gif)
 
-These *daemons*, or background processes, manage the nodes, compute resource in Slurm, and *partitions*, which group nodes into logical sets for user jobs to run on.
+These *daemons*, or background processes, manage the nodes, compute resources in Slurm, and *partitions*, which group nodes into logical sets for user jobs to run on.
 
 Slurm will also manage the allocations of resources assigned to a user, the time those resources are allocated, and *job steps*, which are sets of (possibly parallel) tasks within a job.
 
@@ -240,15 +240,15 @@ The following commands are helpful to know.
 
 `sinfo` reports the state of partitions and nodes managed by Slurm and provides sorting and filtering options.
 
-`srun` is what we will use to submit a job for execution or initiate job steps interactively. We will see examples of `srun` in the following sections. `srun`provides configurability for the user jobs to specific minimum and maximum node count, processor count, specific nodes to use or not use, and node requirements such as memory or disk space available.
+`srun` is what we will use to submit a job for execution or initiate job steps interactively. We will see examples of `srun` in the following sections. `srun` provides configurability for the user jobs to specific minimum and maximum node count, processor count, specific nodes to use or not use, and node requirements such as memory or disk space available.
 
-`sbatch` is used to submit a job script for later execution. The script will typically contain one or more srun commands to launch parallel tasks.
+`sbatch` is used to submit a job script for later execution. The script may contain srun commands to launch parallel tasks.
 
 `squeue -u $USER` will show your jobs.
 
-`scontrol show job 123456` will provide the reason a job is waiting.
+`scontrol show job 123456` provides detailed job information, including the reason a pending job is waiting.
 
-`squeue --start -j 123456` will provide an estimate of how long the job needs to wait before running.
+`squeue --start -j 123456` provides an estimated start time.
 
 These commands will support our three step workflow in enabling us to inspect partitions, run jobs, and check the status of those jobs.
 
@@ -268,9 +268,9 @@ Get a summary of available partitions.
 sinfo -s
 ```
 
-The output will show the resources allocated (A), idle (I), in some other state, such as down or reserved (O), and the total number of resources (T) on each partition.
+The output summarizes the number of nodes allocated (A), idle (I), in other states (O), and the total number of nodes (T) for each partition.
 
-You can customize the output of `sinfo`. The following command will filter the GPU nodes and show nodes, available GPUs, and their current state.
+You can customize the output of `sinfo`. The following command will filter the GPU nodes and show nodes, configured GPUs, and their current state.
 
 ```bash
 sinfo --partition=gpu --format="%N %G %T"
@@ -278,7 +278,7 @@ sinfo --partition=gpu --format="%N %G %T"
 
 ### 5.4 Slurm Workflow Step 2: Submit Jobs
 
-We will use two basic methods of submitting jobs in this class: interactive and batch. Interactive jobs are submitted with `srun`. This transfers to a shell running on a GPU partition where you can use its resources via the terminal or via launching applications (such as jupyter) from the terminal. Batch jobs are submitted with `sbatch` from a login node. We will cover interactive submission with `srun` here and then cover batch submission later.
+We will use two basic methods of submitting jobs in this class: interactive and batch. Interactive jobs are submitted with `srun`. This launches a shell on a GPU compute node allocated through Slurm. Batch jobs are submitted with `sbatch` from a login node. We will cover interactive submission with `srun` here and then cover batch submission later.
 
 Request a GPU using `srun`. Use its arguments to specify your requirements. Here we request a node with one GPU, two CPUs per task, 8GB of memory, for 10 minutes. We specify we want to log onto this node with a Bash shell.
 
@@ -343,7 +343,9 @@ This should confirm you are on a GPU node, e.g., `gpu017.amarel.rutgers.edu`. On
 +-----------------------------------------------------------------------------------------+
 ```
 
-Note that you will need to exit the node by typing `exit` when finished to get back to your log in shell.
+Note that not all of the GPUs you see with `nvidia-smi` are necessarily allocated to you.
+
+Remember you will need to exit the node by typing `exit` when finished to get back to your log in shell.
 
 ### 5.5 Slurm Workflow Step 3: Check Status of Jobs
 
@@ -440,7 +442,7 @@ You should see something similar to the following.
 [<netID>@amarel3 ~]$ uv --version
 uv 0.13.0 (x86_64-unknown-linux-gnu)
 [<netID>@amarel3 ~]$ which uv
-~/.local/bin/uv
+/home/<netID>/.local/bin/uv
 [<netID>@amarel3 ~]$
 ```
 
@@ -468,7 +470,7 @@ uv python list --only-installed
 
 ### 6.4 Create a Test Virtual Environment
 
-Now we will built a test virtual environment to confirm we can work with PyTorch and other Python packages. First, make sure that you can use `uv` to install Python packages.
+Now we will build a test virtual environment to confirm we can work with PyTorch and other Python packages. First, make sure that you can use `uv` to install Python packages.
 
 ```bash
 mkdir -p ~/amarel-pytorch-test
@@ -476,7 +478,7 @@ cd ~/amarel-pytorch-test
 uv venv --python 3.12
 ```
 
-If everything is set up correctly, you should see that a `.venv` has been created and you should be able to use the interpreter in that virtual environment. Test the interpreter you created by confirming the version of Python is it using.
+If everything is set up correctly, you should see that a `.venv` has been created and you should be able to use the interpreter in that virtual environment. Test the interpreter you created by confirming the version of Python it is using.
 
 ```bash
 .venv/bin/python --version
@@ -500,7 +502,7 @@ Confirm NumPy has been installed.
 
 Now we will install GPU-enabled PyTorch. The configuration below is suggested.
 
-The `--index-url` argument tells the installer to get the version of packaged with Cuda 12.8.
+The `--index-url` argument tells the installer to get the version of PyTorch packaged with CUDA 12.8.
 
 ```bash
 cd ~/amarel-pytorch-test
@@ -511,7 +513,7 @@ uv pip install \
     --index-url https://download.pytorch.org/whl/cu128
 ```
 
-Verify everything is working by printing the torch version and the Cuda version.
+Verify everything is working by printing the torch version and the CUDA version.
 
 ```bash
 .venv/bin/python -c \
@@ -643,11 +645,11 @@ torch.save(model.state_dict(), "model.pt")
 print("Training complete!")
 ```
 
-Consider using [Vim](https://www.vim.org/) or [https://www.nano-editor.org/](nano) to add to the file.
+Consider using [Vim](https://www.vim.org/) or [nano](https://www.nano-editor.org/) to add to the file.
 
-Note that we had to move both the training data and the model to the GPU using device="cuda" and .to(device). Without this, PyTorch operations would execute on the CPU by default.
+Note that we had to move both the training data and the model to the GPU using `device="cuda"` and `.to(device)`. Without this, PyTorch operations would execute on the CPU by default.
 
-We also use torch.cuda.synchronize() when measuring execution time because CUDA operations execute asynchronously. Synchronization ensures that GPU operations have completed before we record the elapsed time.
+We also use `torch.cuda.synchronize()` when measuring execution time because CUDA operations execute asynchronously. Synchronization ensures that GPU operations have completed before we record the elapsed time.
 
 ### 7.2 Create a Slurm Batch Script
 
@@ -683,7 +685,7 @@ nvidia-smi
 echo "End time: $(date)"
 ```
 
-The lines beginning with #SBATCH are instructions to Slurm that specify the resources required by our job. We request one GPU, two CPU cores, 8 GB of system RAM, and a maximum execution time of 15 minutes. The `#SBATCH` directives are read by Slurm when the job is submitted and specify our required computing resources. They are not comments (even though they look like them)! You can read more about `#SBATCH` directives in the [Slurm documentation](https://slurm.schedmd.com/sbatch.html).
+The lines beginning with #SBATCH are instructions to Slurm that specify the resources required by our job. We request one GPU, two CPU cores, 8 GB of system RAM, and a maximum execution time of 15 minutes. The `#SBATCH` directives are read by Slurm when the job is submitted and specify our required computing resources. Although these lines are treated as comments by Bash, Slurm interprets them as job directives when the script is submitted. You can read more about `#SBATCH` directives in the [Slurm documentation](https://slurm.schedmd.com/sbatch.html).
 
 ### 7.3 Submit Batch Jobs
 
@@ -700,7 +702,7 @@ Exit the GPU node if you are still on it to return to the login node. Submit the
 sbatch train.sh
 ```
 
-If the job submission is successful you will see something like the following message.
+If the job submission is successful, you will see something like the following message.
 
 ```text
 Submitted batch job 123456
@@ -712,7 +714,7 @@ Unlike `srun --pty bash`, sbatch returns control to your terminal immediately af
 
 ### 7.4 Monitor the Job
 
-Now that the job has been submitted, we move onto the third step in our workflow and proceed to inspect and monitor our job.
+Now that the job has been submitted, we move on to the third step in our workflow and proceed to inspect and monitor our job.
 
 View the jobs associated with your account.
 
@@ -728,7 +730,7 @@ Use `scontrol` to inspect a specific job given its job ID.
 scontrol show job 123456
 ```
 
-Use `squeue` to attempt to get an estimated state time for jobs that are pending.
+Use `squeue` to attempt to get an estimated start time for jobs that are pending.
 
 ```bash
 squeue --start -j 123456
@@ -762,7 +764,7 @@ Training complete!
 End time: ...
 ```
 
-You should also see the saved model file created by PyTorch, `model.pt` in this example.
+You should also see the saved model file created by PyTorch, `model.pt` in this example. Note that you may be allocated different GPUs for different jobs. It can be helpful to know what GPU models you have been allocated.
 
 ### 7.5 View Resource Usage
 
@@ -772,8 +774,6 @@ You can also use Slurm to view the resources that your job used.
 sacct -j 123456 \
     --format=JobID,JobName,State,Elapsed,AllocCPUS,ReqMem,MaxRSS,ExitCode
 ```
-
-The fields above tell us:
 
 Some useful fields include:
 * **State**: Whether the job completed successfully, failed, or was cancelled.
@@ -788,7 +788,7 @@ The MaxRSS value measures system memory rather than GPU memory. Our Python scrip
 
 ## 8 (Optional) Serve a Jupyter Notebook with Amarel Resources
 
-So far, we have used Amarel resources interactively with `srun` or submitted batch jobs with `sbatch`. Though not required, it is also possible launch a Jupyter server so that we can run Jupyter in our browser with access to Amarel resources. To do this, we will launch a Jupyter server on an allocated GPU compute node and establish an SSH tunnel that allows our local browser to communicate with that server.
+So far, we have used Amarel resources interactively with `srun` or submitted batch jobs with `sbatch`. Though not required, it is also possible to launch a Jupyter server so that we can run Jupyter in our browser with access to Amarel resources. To do this, we will launch a Jupyter server on an allocated GPU compute node and establish an SSH tunnel that allows our local browser to communicate with that server.
 
 ### 8.1 Step 1: Install Jupyter
 
@@ -947,6 +947,8 @@ Display your public key.
 cat ~/.ssh/id_ed25519.pub
 ```
 
+If you selected a different filename when generating your key, use the corresponding `.pub` file instead.
+
 Copy the output and navigate to [GitHub SSH Keys](https://github.com/settings/keys). Select **New SSH key**, provide a descriptive name such as `Rutgers Amarel`, and paste your public key.
 
 Never share your private key (the file without `.pub`).
@@ -1006,7 +1008,7 @@ You should see `train.py`, `train.sh`, and `train.ipynb` along with the files `u
 
 ### 9.3 Step 3: Create Your Virtual Environment
 
-From the `amarel-example-project` folder, create your virtual environment from the specifications in the `.toml`.
+From the `amarel-example-project` folder, create your virtual environment from the project's `pyproject.toml` and `uv.lock` files.
 
 ```bash
 uv sync --locked
@@ -1078,7 +1080,7 @@ $HOME/amarel-tutorial/amarel-example-project/.venv/bin/jupyter lab \
     --port=8888
 ```
 
-Record the compute node hostname and Jupyter authentication token displayed in the terminal.
+This will use the JupyterLab version installed in the project's virtual environment. Record the compute node hostname and Jupyter authentication token displayed in the terminal.
 
 Open a new terminal on your local computer and establish an SSH tunnel, replacing the placeholders with your NetID and allocated compute node.
 
@@ -1191,7 +1193,7 @@ Alternatively, you can connect VS Code to another folder and clone projects late
 
 If you have connected VS Code to the project folder we used earlier, you should now see the files in the repository, including `train.py`, `train.sh`, `train.ipynb`, and `pyproject.toml`.
 
-Open an integrated terminal in VS Code using **Terminal -> New Terminal** or via the keyboard shortcut **Ctrl + Shift + \`** or **Control + Shift + \`** on Mac and run:
+Open an integrated terminal in VS Code using **Terminal -> New Terminal** or via your preferred keyboard shortcut.
 
 ```bash
 hostname
