@@ -790,7 +790,7 @@ The MaxRSS value measures system memory rather than GPU memory. Our Python scrip
 
 So far, we have used Amarel resources interactively with `srun` or submitted batch jobs with `sbatch`. Though not required, it is also possible to launch a Jupyter server so that we can run Jupyter in our browser with access to Amarel resources. To do this, we will launch a Jupyter server on an allocated GPU compute node and establish an SSH tunnel that allows our local browser to communicate with that server.
 
-### 8.1 Step 1: Install Jupyter
+### 8.1 Install Jupyter
 
 From your Amarel login node, navigate to the Python environment we created earlier.
 
@@ -799,7 +799,7 @@ cd ~/amarel-pytorch-test
 uv pip install jupyterlab ipykernel
 ```
 
-### 8.2 Step 2: Request a GPU Node
+### 8.2 Request a GPU Node
 
 Request an interactive GPU session using Slurm, just as we did earlier.
 
@@ -825,7 +825,7 @@ nvidia-smi
 
 Record the hostname, which should resemble gpu017.amarel.rutgers.edu. We will use it when configuring our SSH tunnel.
 
-### 8.3 Step 3: Launch Jupyter
+### 8.3 Launch Jupyter
 
 From the compute node, navigate to your project directory and start JupyterLab.
 
@@ -849,7 +849,7 @@ http://127.0.0.1:8888/lab?token=<your_token>
 
 Keep this terminal open. Closing Jupyter will terminate the notebook server.
 
-### 8.4 Step 4: Establish an SSH Tunnel
+### 8.4 Establish an SSH Tunnel
 
 Open a new terminal on your local computer, not on Amarel.
 
@@ -882,7 +882,7 @@ This enables forwarding from your local computer through the login node to the G
  Browser - localhost:8888       SSH jump host (`-J`)        Jupyter - Port 8888
 ```
 
-### 8.5 Step 5: Open Jupyter in Your Browser
+### 8.5 Open Jupyter in Your Browser
 
 Once the SSH tunnel is established, open a browser on your local computer and navigate to:
 
@@ -905,7 +905,7 @@ print("GPU:", torch.cuda.get_device_name(0))
 
 If everything is configured correctly, the notebook will execute using the GPU allocated to your interactive Slurm job.
 
-### 8.6 Step 6: Close the Session
+### 8.6 Close the Session
 
 When finished, shut down the Jupyter server using Ctrl+C in the terminal where you launched it.
 
@@ -929,7 +929,7 @@ In this example, we will clone the repository containing this tutorial and use t
 - `train.sh`: The Slurm batch script used to submit the training job.
 - `train.ipynb`: A Jupyter notebook containing the same training example.
 
-### 9.1 Step 1: Configure GitHub Authentication on Amarel
+### 9.1 Configure GitHub Authentication on Amarel
 
 If you plan to push changes to GitHub from Amarel, you will need to configure authentication. GitHub does not support password authentication for Git operations over HTTPS. We will use **SSH keys** to authenticate from Amarel. Note that you do not need authentication to clone or pull from public repositories.
 
@@ -975,7 +975,7 @@ git remote set-url origin git@github.com:<organization>/<repository>.git
 
 You should now be able to use `git pull` and `git push` from Amarel, provided your GitHub account has access to the repository. If you configured a passphrase, you may use `ssh-agent` to avoid entering it repeatedly during your session. See [GitHub's SSH authentication documentation](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) for additional guidance.
 
-### 9.2 Step 2: Clone This Repository from Amarel
+### 9.2 Clone This Repository from Amarel
 
 Log into Amarel through SSH as we did earlier.
 
@@ -1006,7 +1006,7 @@ ls -al
 
 You should see `train.py`, `train.sh`, and `train.ipynb` along with the files `uv` needs to build your environment: `uv.lock` and `pyproject.toml`.
 
-### 9.3 Step 3: Create Your Virtual Environment
+### 9.3 Create Your Virtual Environment
 
 From the `amarel-example-project` folder, create your virtual environment from the project's `pyproject.toml` and `uv.lock` files.
 
@@ -1016,7 +1016,7 @@ uv sync --locked
 
 This automates setting up your Python environment, just as it does when developing locally.
 
-### 9.4 Step 4: Kick Off a Batch Job
+### 9.4 Kick Off a Batch Job
 
 Our example project already includes the Slurm batch script `train.sh`. Before submitting it, inspect its contents.
 
@@ -1048,7 +1048,7 @@ cat training-123456.out
 
 You should see the training loss reported periodically, along with the GPU information, total training time, and peak GPU memory usage. The trained model checkpoint, `model.pt`, should also be saved in the project directory.
 
-### 9.5 Step 5: (Optional) Serve Up a Jupyter Notebook
+### 9.5 (Optional) Serve Up a Jupyter Notebook
 
 We can also open the notebook included in the repository using the Jupyter workflow introduced earlier.
 
@@ -1134,7 +1134,7 @@ Here we will use VS Code's **Remote - SSH** extension to connect VS Code directl
 
 Note that VS Code connects to an Amarel login node, not a GPU compute node. We will continue to use Slurm to submit computationally intensive jobs. Do not attempt to bypass job scheduling by connecting VS Code directly to a compute node.
 
-### 10.1 Step 1: Install the Remote-SSH Extension
+### 10.1 Install the Remote-SSH Extension
 
 Open VS Code on your local computer and navigate to the Extensions panel (`Ctrl+Shift+X`).
 
@@ -1142,7 +1142,7 @@ Search for and install Microsoft's [Remote - SSH](https://marketplace.visualstud
 
 Make sure you are connected to the Rutgers VPN before proceeding if you are off campus.
 
-### 10.2 Step 2: Configure an SSH Host
+### 10.2 Configure an SSH Host
 
 Open the VS Code Command Palette (`Ctrl+Shift+P`) and select:
 
@@ -1169,7 +1169,7 @@ Host amarel
 
 This configuration is stored on your local computer and allows VS Code to recognize Amarel as a remote host.
 
-### 10.3 Step 3: Connect Using Remote Explorer
+### 10.3 Connect Using Remote Explorer
 
 Open the **Remote Explorer** panel in VS Code and select **SSH Targets**.
 
@@ -1181,7 +1181,7 @@ VS Code will install its remote server components in your Amarel home directory 
 
 Once connected, you should see an SSH connection indicator in the bottom-left corner of VS Code.
 
-### 10.4 Step 4: Open Your Repository
+### 10.4 Open Your Repository
 
 From the remote VS Code window, select **File -> Open Folder** and navigate to the example project we cloned earlier:
 
@@ -1205,7 +1205,7 @@ The hostname should identify an Amarel login node, and the working directory sho
 
 Notice that both the VS Code file explorer and integrated terminal are now operating on Amarel rather than your local computer.
 
-### 10.5 Step 5: Configure Your Python Environment
+### 10.5 Configure Your Python Environment
 
 If prompted, install the Microsoft Python extension in the remote VS Code environment.
 
@@ -1227,7 +1227,7 @@ You can use familiar VS Code features such as code completion, syntax highlighti
 
 **Note:** Selecting a Python interpreter does not allocate a GPU. Do not run computationally intensive Python programs directly from the VS Code editor or its login-node terminal. Use Slurm to request the necessary compute resources.
 
-### 10.6 Step 6: Submit a Slurm Job from VS Code
+### 10.6 Submit a Slurm Job from VS Code
 
 Now that we have connected VS Code to Amarel, we can use its integrated terminal to submit training jobs.
 
@@ -1252,13 +1252,13 @@ When finished, disconnect using `Remote-SSH: Close Remote Connection` from the C
 ## 11 Summary
 
 Now we have reviewed the basics of using Amarel to train models. We have learned how to:
-1. Log into the cluster.
-2. Prepare a Python development environment on the cluster.
-3. Inspect the cluster resources available to us.
-4. Use a partition interactively or submit batch jobs to it.
-5. Monitor job execution and inspect the output.
-6. (Optionally) Run Jupyter notebooks from your browser with access to Amarel's GPUs.
-7. Clone a repository you developed elsewhere and use Amarel servers to run code from that repository.
-8. (Optionally) Connect VS Code to Amarel's login node.
+* Log into the cluster.
+* Prepare a Python development environment on the cluster.
+* Inspect the cluster resources available to us.
+* Use a partition interactively or submit batch jobs to it.
+* Monitor job execution and inspect the output.
+* (Optionally) Run Jupyter notebooks from your browser with access to Amarel's GPUs.
+* Clone a repository you developed elsewhere and use Amarel servers to run code from that repository.
+* (Optionally) Connect VS Code to Amarel's login node.
 
 These fundamentals give us the basic skills we will need to move on to training larger models and datasets.

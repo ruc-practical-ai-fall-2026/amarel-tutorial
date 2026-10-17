@@ -4,4 +4,5 @@ pandoc 01-amarel-setup.md \
     --lua-filter=pandoc-title.lua \
     --include-in-header=pandoc-header.tex \
     --toc \
-    --toc-depth=2
+    --toc-depth=2 \
+    -V geometry:margin=1in
