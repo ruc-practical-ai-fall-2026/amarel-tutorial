@@ -1262,3 +1262,4 @@ Now we have reviewed the basics of using Amarel to train models. We have learned
 * (Optionally) Connect VS Code to Amarel's login node.
 
 These fundamentals give us the basic skills we will need to move on to training larger models and datasets.
+
