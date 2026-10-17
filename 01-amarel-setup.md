@@ -1095,7 +1095,7 @@ Open the Jupyter URL in your local browser.
 http://localhost:8888/lab?token=<your_token>
 ```
 
-Note if you are using a terminal in VSCode, you can also click the link and open JupyterLab in VSCode.
+Note if you are using a terminal in VS Code, you can also click the link and open JupyterLab in VS Code.
 
 Navigate to `train.ipynb` and open it. Make sure the selected Python kernel corresponds to the environment containing PyTorch.
 
@@ -1126,9 +1126,126 @@ Your updated code is now available to execute on the cluster.
 
 **Note:** As with local development, avoid committing virtual environments, large datasets, and model checkpoints to Git. These should generally remain outside version control, with `.gitignore` configured appropriately.
 
-## Connect VSCode to Amarel
+## (Optional) Connect VS Code to Amarel
 
+Here we will use VS Code's **Remote - SSH** extension to connect VS Code directly to an Amarel login node. This allows us to work with files stored on the cluster while using the VS Code interface on our local computer.
 
+Note that VS Code connects to an Amarel login node, not a GPU compute node. We will continue to use Slurm to submit computationally intensive jobs. Do not attempt to bypass job scheduling by connecting VS Code directly to a compute node.
+
+### Step 1: Install the Remote-SSH Extension
+
+Open VS Code on your local computer and navigate to the Extensions panel (`Ctrl+Shift+X`).
+
+Search for and install Microsoft's [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension.
+
+Make sure you are connected to the Rutgers VPN before proceeding if you are off campus.
+
+### Step 2: Configure an SSH Host
+
+Open the VS Code Command Palette (`Ctrl+Shift+P`) and select:
+
+`Remote-SSH: Add New SSH Host...`
+
+Enter the SSH command we have been using to connect to Amarel:
+
+```bash
+ssh <netID>@amarel.rutgers.edu
+```
+
+When prompted, select your default SSH configuration file, typically:
+
+- **Windows:** `C:\Users\<username>\.ssh\config`
+- **macOS/Linux:** `~/.ssh/config`
+
+VS Code will add an entry to your SSH configuration. You can optionally edit the entry to give Amarel a shorter alias:
+
+```ssh
+Host amarel
+    HostName amarel.rutgers.edu
+    User <netID>
+```
+
+This configuration is stored on your local computer and allows VS Code to recognize Amarel as a remote host.
+
+### Step 3: Connect Using Remote Explorer
+
+Open the **Remote Explorer** panel in VS Code and select **SSH Targets**.
+
+Locate `amarel` (or `amarel.rutgers.edu`) and select **Connect to Host in New Window**.
+
+VS Code may prompt you for your Amarel credentials. On the first connection, you may also be asked to select the remote operating system. Choose Linux.
+
+VS Code will install its remote server components in your Amarel home directory if necessary.
+
+Once connected, you should see an SSH connection indicator in the bottom-left corner of VS Code.
+
+### Step 4: Open Your Repository
+
+From the remote VS Code window, select **File -> Open Folder** and navigate to the example project we cloned earlier:
+
+```text
+~/amarel-tutorial/amarel-example-project
+```
+
+Alternatively, you can connect VS Code to another folder and clone projects later.
+
+If you have connected VS Code to the project folder we used earlier, you should now see the files in the repository, including `train.py`, `train.sh`, `train.ipynb`, and `pyproject.toml`.
+
+Open an integrated terminal in VS Code using **Terminal -> New Terminal** or via the keyboard shortcut **Ctrl + Shift + \`** or **Control + Shift + \`** on Mac and run:
+
+```bash
+hostname
+pwd
+git status
+```
+
+The hostname should identify an Amarel login node, and the working directory should correspond to your example project.
+
+Notice that both the VS Code file explorer and integrated terminal are now operating on Amarel rather than your local computer.
+
+### Step 5: Configure Your Python Environment
+
+If prompted, install the Microsoft Python extension in the remote VS Code environment.
+
+Open the Command Palette and select:
+
+`Python: Select Interpreter`
+
+Select the Python interpreter from the virtual environment we created earlier using `uv sync`:
+
+```text
+~/amarel-tutorial/amarel-example-project/.venv/bin/python
+```
+
+If VS Code does not recognize the `~` abbreviation, use the full absolute path.
+
+VS Code should now recognize the Python packages installed in your project's environment, including PyTorch.
+
+You can use familiar VS Code features such as code completion, syntax highlighting, debugging, and code navigation while working with files stored on Amarel.
+
+**Note:** Selecting a Python interpreter does not allocate a GPU. Do not run computationally intensive Python programs directly from the VS Code editor or its login-node terminal. Use Slurm to request the necessary compute resources.
+
+### Step 6: Submit a Slurm Job from VS Code
+
+Now that we have connected VS Code to Amarel, we can use its integrated terminal to submit training jobs.
+
+From the example project directory, submit the training script:
+
+```bash
+sbatch train.sh
+```
+
+Slurm should return a job ID. Monitor the job as we did previously:
+
+```bash
+watch squeue -u $USER
+```
+
+Once the job completes, open the resulting `training-<job_id>.out` file directly from the VS Code Explorer to inspect the training results.
+
+You can also use VS Code's integrated Git functionality to commit changes, pull updates, and push code to GitHub.
+
+When finished, disconnect using `Remote-SSH: Close Remote Connection` from the Command Palette or close the remote VS Code window. Any jobs submitted through `sbatch` will continue running independently of your VS Code connection.
 
 ## Summary
 
@@ -1140,6 +1257,6 @@ Now we have reviewed the basics of using Amarel to train models. We have learned
 5. Monitor job execution and inspect the output.
 6. (Optionally) Run Jupyter notebooks from your browser with access to Amarel's GPUs.
 7. Clone a repository you developed elsewhere and use Amarel servers to run code from that repository.
+8. (Optionally) Connect VS Code to Amarel's login node.
 
 These fundamentals give us the basic skills we will need to move on to training larger models and datasets.
-
